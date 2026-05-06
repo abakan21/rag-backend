@@ -128,17 +128,25 @@ def query_rag(query: str, k: int = 5):
 
     prompt = PromptTemplate(template=template, input_variables=["context", "question"])
 
-    ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
-    print(f"Initializing Ollama at {ollama_url}. Generating response...")
+    from langchain_openai import ChatOpenAI
+
+    api_base = os.getenv("OLLAMA_URL", "https://llm.ai.e-infra.cz/v1" )
+    api_key = os.getenv("OLLAMA_API_KEY", "")
+    model_name = os.getenv("LLM_MODEL_NAME", "llama3.3:latest")
+
+    print(f"Initializing LLM at {api_base}. Generating response...")
     try:
-        # Using a more robust prompt formatting and model selection
-        llm = Ollama(model="llama3.2", base_url=ollama_url, temperature=0.1)
-        answer = llm.invoke(prompt.format(context=context_text, question=query))
-    except Exception as e:
-        print(f"Ollama generation failed: {e}")
-        answer = (
-            "Bohužel se nepodařilo spojit s Ollama modelem nebo generování selhalo."
+        llm = ChatOpenAI(
+            model=model_name,
+            openai_api_base=api_base,
+            openai_api_key=api_key,
+            temperature=0.1
         )
+        response = llm.invoke(prompt.format(context=context_text, question=query))
+        answer = response.content
+    except Exception as e:
+        print(f"LLM generation failed: {e}")
+        answer = "Bohužel se nepodařilo spojit s LLM modelem nebo generování selhalo."
 
     sources = []
     seen_urls = set()
