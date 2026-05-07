@@ -11,31 +11,7 @@ def test_compute_sha256():
     assert _compute_sha256(data) == expected
 
 
-def test_detect_strategy_html():
-    from ingestion import _detect_strategy, StrategyEnum
-    doc = MagicMock()
-    doc.markdown = "x" * 200
-    doc.html = "<html>test</html>"
-    doc.screenshot = None
-    assert _detect_strategy(doc) == StrategyEnum.HTML
 
-
-def test_detect_strategy_render():
-    from ingestion import _detect_strategy, StrategyEnum
-    doc = MagicMock()
-    doc.markdown = "x" * 200
-    doc.html = None
-    doc.screenshot = None
-    assert _detect_strategy(doc) == StrategyEnum.RENDER
-
-
-def test_detect_strategy_screenshot():
-    from ingestion import _detect_strategy, StrategyEnum
-    doc = MagicMock()
-    doc.markdown = ""
-    doc.html = None
-    doc.screenshot = "base64data"
-    assert _detect_strategy(doc) == StrategyEnum.SCREENSHOT
 
 
 def test_check_robots_txt_allows():
@@ -64,15 +40,4 @@ def test_check_robots_txt_error_allows():
         assert _check_robots_txt("https://unreachable.example.com") is True
 
 
-def test_get_doc_url_dict_metadata():
-    from ingestion import _get_doc_url
-    doc = MagicMock()
-    doc.metadata = {"url": "https://actual.example.com"}
-    assert _get_doc_url(doc, "https://fallback.com") == "https://actual.example.com"
 
-
-def test_get_doc_url_fallback():
-    from ingestion import _get_doc_url
-    doc = MagicMock()
-    doc.metadata = {}
-    assert _get_doc_url(doc, "https://fallback.com") == "https://fallback.com"

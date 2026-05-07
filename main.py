@@ -65,6 +65,8 @@ def get_me(user: UserInfo = Depends(get_current_user)):
 
 # ── Ingestion ─────────────────────────────────────────────────
 
+VALID_SCHEDULES = {None, "hourly", "daily", "weekly", "monthly"}
+
 class IngestRequest(BaseModel):
     url: str
     source_name: str = "DefaultSource"
@@ -82,6 +84,10 @@ def trigger_ingestion(
     admin: UserInfo = Depends(get_admin_user),
 ):
     # Фикс дубликатов — проверяем активный job для этого URL
+    # Validace schedule
+    if request.schedule not in VALID_SCHEDULES:
+        raise HTTPException(status_code=400, detail=f"Invalid schedule: {request.schedule}. Valid: hourly, daily, weekly, monthly")
+
     # Check duplicate: RUNNING job for this URL
     existing_job = db.query(IngestJob).filter(
         IngestJob.url == request.url,
